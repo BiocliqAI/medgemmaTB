@@ -1,40 +1,38 @@
 #!/usr/bin/env python3
 """
 Railway startup script for MedGemma TB Detector
-Starts the FastAPI server with proper configuration
 """
 
 import os
 import sys
-import subprocess
 
 # Add backend directory to Python path
-backend_dir = os.path.join(os.path.dirname(__file__), 'backend')
-sys.path.insert(0, backend_dir)
+sys.path.insert(0, '/app/backend')
 
-# Change to backend directory
-os.chdir(backend_dir)
+# Set working directory
+os.environ['PYTHONPATH'] = '/app/backend:/app'
 
-# Import and run the main application
 if __name__ == "__main__":
     try:
+        # Import from backend directory
+        sys.path.insert(0, '/app/backend')
         from main import app
         import uvicorn
         
-        # Get port from environment (Railway sets this)
+        # Get port from Railway environment  
         port = int(os.environ.get("PORT", 8000))
-        host = "0.0.0.0"
         
-        print(f"🚀 Starting MedGemma TB Detector on {host}:{port}")
-        print(f"📁 Working directory: {os.getcwd()}")
-        print(f"🔑 HF API Token configured: {bool(os.environ.get('HUGGINGFACE_API_TOKEN'))}")
+        print(f"🚀 Starting on 0.0.0.0:{port}")
+        print(f"🔑 HF Token: {bool(os.environ.get('HUGGINGFACE_API_TOKEN'))}")
         
         uvicorn.run(
             app,
-            host=host,
+            host="0.0.0.0", 
             port=port,
             log_level="info"
         )
     except Exception as e:
-        print(f"❌ Failed to start application: {e}")
+        print(f"❌ Error: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
