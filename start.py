@@ -5,34 +5,73 @@ Railway startup script for MedGemma TB Detector
 
 import os
 import sys
+import time
 
-# Add backend directory to Python path
-sys.path.insert(0, '/app/backend')
-
-# Set working directory
-os.environ['PYTHONPATH'] = '/app/backend:/app'
-
-if __name__ == "__main__":
+def main():
+    print("=" * 50)
+    print("🚀 MedGemma TB Detector - Railway Startup")
+    print("=" * 50)
+    
+    # Debug environment
+    print(f"📁 Working directory: {os.getcwd()}")
+    print(f"🐍 Python path: {sys.path}")
+    print(f"🔑 HF Token present: {bool(os.environ.get('HUGGINGFACE_API_TOKEN'))}")
+    print(f"🌐 PORT env: {os.environ.get('PORT', 'Not set')}")
+    
+    # List directory contents
+    print(f"📋 App directory contents: {os.listdir('/app')}")
+    if os.path.exists('/app/backend'):
+        print(f"📋 Backend directory contents: {os.listdir('/app/backend')}")
+    
     try:
-        # Import from backend directory
+        # Add paths
+        sys.path.insert(0, '/app')
         sys.path.insert(0, '/app/backend')
-        from main import app
+        
+        print("📦 Importing dependencies...")
+        
+        # Test imports one by one
+        print("  - Importing FastAPI...")
+        from fastapi import FastAPI
+        
+        print("  - Importing uvicorn...")
         import uvicorn
         
-        # Get port from Railway environment  
+        print("  - Importing main application...")
+        
+        # Try to import the main app
+        try:
+            from main import app
+            print("  ✅ Main app imported successfully")
+        except ImportError as e:
+            print(f"  ❌ Failed to import main app: {e}")
+            # Try alternative import
+            import main
+            app = main.app
+            print("  ✅ Main app imported via alternative method")
+        
+        # Get port
         port = int(os.environ.get("PORT", 8000))
+        print(f"🌐 Starting server on 0.0.0.0:{port}")
         
-        print(f"🚀 Starting on 0.0.0.0:{port}")
-        print(f"🔑 HF Token: {bool(os.environ.get('HUGGINGFACE_API_TOKEN'))}")
-        
+        # Start the server
         uvicorn.run(
             app,
-            host="0.0.0.0", 
+            host="0.0.0.0",
             port=port,
-            log_level="info"
+            log_level="info",
+            access_log=True
         )
+        
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"❌ Startup failed: {e}")
         import traceback
         traceback.print_exc()
+        
+        # Wait a bit before exiting to see logs
+        print("⏱️ Waiting 10 seconds before exit...")
+        time.sleep(10)
         sys.exit(1)
+
+if __name__ == "__main__":
+    main()
