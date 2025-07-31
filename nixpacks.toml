@@ -1,0 +1,18 @@
+[phases.setup]
+nixPaths = ["python310"]
+
+[phases.install]
+cmds = [
+    "cd backend && pip install -r requirements.txt"
+]
+
+[phases.build]
+cmds = [
+    "cd frontend && npm install && npm run build"
+]
+
+[start]
+cmd = "cd backend && python main.py"
+
+[variables]
+PYTHONUNBUFFERED = "1"
