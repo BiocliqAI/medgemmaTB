@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 import asyncio
 from pathlib import Path
@@ -42,6 +43,9 @@ app.add_middleware(
 model = None
 image_processor = ImageProcessor()
 tb_analyzer = TBAnalyzer()
+
+# Mount static files for frontend (will be available after build)
+frontend_build_path = Path(__file__).parent.parent / "frontend" / "build"
 
 @app.on_event("startup")
 async def startup_event():
@@ -176,6 +180,16 @@ async def batch_analyze(files: list[UploadFile] = File(...)):
         "total_processed": len(results),
         "disclaimer": "These analyses are for research purposes only and should not be used for medical diagnosis."
     })
+
+# Mount frontend static files (after API routes)
+@app.on_event("startup")
+async def mount_frontend():
+    if frontend_build_path.exists():
+        app.mount("/static", StaticFiles(directory=str(frontend_build_path / "static")), name="static")
+        app.mount("/", StaticFiles(directory=str(frontend_build_path), html=True), name="frontend")
+        print("✅ Frontend static files mounted")
+    else:
+        print("ℹ️ Frontend build directory not found - API only mode")
 
 if __name__ == "__main__":
     uvicorn.run(

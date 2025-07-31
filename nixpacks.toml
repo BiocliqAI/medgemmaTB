@@ -1,14 +1,15 @@
 [phases.setup]
-nixPaths = ["python310"]
+nixPaths = ["python310", "nodejs-18_x"]
 
 [phases.install]
 cmds = [
-    "cd backend && pip install -r requirements.txt"
+    "pip install -r backend/requirements.txt",
+    "cd frontend && npm install"
 ]
 
 [phases.build]
 cmds = [
-    "cd frontend && npm install && npm run build"
+    "cd frontend && npm run build"
 ]
 
 [start]
@@ -16,3 +17,4 @@ cmd = "cd backend && python main.py"
 
 [variables]
 PYTHONUNBUFFERED = "1"
+NODE_ENV = "production"
