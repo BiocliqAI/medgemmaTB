@@ -3,7 +3,7 @@ nixPaths = ["python310", "nodejs-18_x"]
 
 [phases.install]
 cmds = [
-    "pip install -r backend/requirements.txt",
+    "cd backend && pip install -r requirements.txt",
     "cd frontend && npm install"
 ]
 
